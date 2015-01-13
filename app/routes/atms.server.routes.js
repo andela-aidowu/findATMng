@@ -14,5 +14,5 @@ module.exports = function(app) {
     router.route('/atms/:id')
       .get(atms.getOneATM)
       .post(atms.updateATM)
-      .delete(atms.deleteATM)
+      .delete(atms.deleteATM);
 };

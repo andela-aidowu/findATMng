@@ -143,8 +143,6 @@ exports.queryATM = function(req, res) {
   var obj = {};
   var bankName = req.query.bank;
   var stateValue = req.query.state;
-  console.log(bankName);
-  console.log(stateValue);
   if (bankName && stateValue) {
     obj.bank_name = bankName;
     obj.state = stateValue;
