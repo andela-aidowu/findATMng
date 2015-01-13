@@ -1,8 +1,7 @@
 'use strict';
 
-var errorHandler = require('../errors.server.controller'),
-  mongoose = require('mongoose'),
-  ATM = mongoose.model('ATM');
+var mongoose = require('mongoose'),
+    ATM = mongoose.model('ATM');
 
 var sendJsonResponse = function(res, status, content) {
   res.status(status);
@@ -46,7 +45,7 @@ exports.ATMByDistance = function(req, res) {
   var lat = parseFloat(req.query.lat);
   var maxDistance = parseFloat(req.query.maxDistance);
   var point = {
-    type: "Point",
+    type: 'Point',
     coordinates: [lng, lat]
   };
   var geoOptions = {
@@ -55,7 +54,7 @@ exports.ATMByDistance = function(req, res) {
   };
   if (!lng && lng !==0 || !lat && lat !==0) {
     sendJsonResponse(res, 404, {
-      "message": "lng and lat query parameters are required"
+      'message': 'lng and lat query parameters are required'
     });
     return;
   }
@@ -78,52 +77,53 @@ exports.ATMByDistance = function(req, res) {
   });
 };
 
-exports.getOneATM = function() {
+exports.getOneATM = function(req, res) {
   if (req.params && req.params.atmid) {
     ATM
       .findById(req.params.atmid)
       .exec(function(err, atm) {
         if (!atm) {
-          sendJsonResponse(res, 404, {"message": "atmid not found"});
+          sendJsonResponse(res, 404, {'message': 'atmid not found'});
           return;
         } else if (err) {
           sendJsonResponse(res, 404, err);
           return;
         }
         sendJsonResponse(res, 200, atm);
-      })
+      });
   } else {
-    sendJsonResponse(res, 404, {"message": "No atmid in request"});
+    sendJsonResponse(res, 404, {'message': 'No atmid in request'});
   }
-}
+};
 
 exports.updateATM = function(req, res) {
   if (!req.params.atmid) {
-    sendJsonResponse(res, 404, {"message": "Not found, atmid is required"});
+    sendJsonResponse(res, 404, {'message': 'Not found, atmid is required"'});
     return;
   }
   ATM
     .findById(req.params.atmid)
     .exec(function (err, atm) {
       if (!atm) {
-        sendJsonResponse(res, 404, {"message": "atmid not found"});
+        sendJsonResponse(res, 404, {'message': 'atmid not found'});
+        return;
       }
-      atm.bank_name: req.body.bank_name || atm.bank_name,
-      atm.address: req.body.address || atm.address,
-      atm.state: req.body.state || atm.state,
-      atm.coords: [parseFloat(req.body.lng), parseFloat(req.body.lat)] || atm.coords,
+      atm.bank = req.body.bank_name || atm.bank_name;
+      atm.address = req.body.address || atm.address;
+      atm.state = req.body.state || atm.state;
+      atm.coords = [parseFloat(req.body.lng), parseFloat(req.body.lat)] || atm.coords;
       atm.save(function(err, atm) {
         if(err) {
           sendJsonResponse(res, 404, err);
         } else {
           sendJsonResponse(res, 200, atm);
         }
-      })
-    })
-}
+      });
+    });
+};
 
 exports.deleteATM = function(req, res) {
-  var atmid = request.params.atmid
+  var atmid = req.params.atmid;
   if (atmid) {
     ATM
       .findByIdAndRemove(atmid)
@@ -135,58 +135,59 @@ exports.deleteATM = function(req, res) {
         sendJsonResponse(res, 204, null);
       }); 
   } else {
-    sendJsonResponse(res, 404, {"message": "No atmid"});
+    sendJsonResponse(res, 404, {'message': 'No atmid'});
   }
-}
+};
 
-exports.groupByState = function(req, res) {
-  var stateValue = req.params.state;
-  if (!stateValue) {
-    sendJsonResponse(res, 404, {"message": "State value required"})
-  } else {
+exports.queryATM = function(req, res) {
+  var obj = {};
+  var bankName = req.query.bank;
+  var stateValue = req.query.state;
+  console.log(bankName);
+  console.log(stateValue);
+  if (bankName && stateValue) {
+    obj.bank_name = bankName;
+    obj.state = stateValue;
     ATM
-      .find({state: stateValue})
+      .find(obj)
       .exec(function(err, atms) {
         if (err) {
           sendJsonResponse(res, 404, err);
           return;
         }
         sendJsonResponse(res, 200, atms);
-      })
-  }
-}
-
-exports.groupByBank = function(req, res) {
-  var bankName = req.params.bank;
-  if (!bankName) {
-    sendJsonResponse(res, 404, {"message": "Bank name required"})
-  } else {
+      });
+  } else if (bankName) {
+    obj.bank_name = bankName;
     ATM
-      .find({bank_name: bankName})
+      .find(obj)
       .exec(function(err, atms) {
         if (err) {
           sendJsonResponse(res, 404, err);
           return;
         }
         sendJsonResponse(res, 200, atms);
-      })
-  }
-}
-
-exports.groupByBankAndState = function(req, res) {
-  var bankName = req.params.bank;
-  var stateValue = req.params.state
-  if (!bankName && !stateValue) {
-    sendJsonResponse(res, 404, {"message": "Bank name and stateValue is required"})
-  } else {
+      });
+  } else if (stateValue) {
+    obj.state = stateValue;
     ATM
-      .find({bank_name: bankName, state: stateValue})
+      .find(obj)
+      .exec(function(err, atms) {
+        if (err) {
+          sendJsonResponse(res, 404, err);
+          return;
+        }
+          sendJsonResponse(res, 200, atms);
+        });
+  } else if (!bankName && !stateValue) {
+    ATM
+      .find(obj)
       .exec(function(err, atms) {
         if (err) {
           sendJsonResponse(res, 404, err);
           return;
         }
         sendJsonResponse(res, 200, atms);
-      })
+      });
   }
-}
+};
