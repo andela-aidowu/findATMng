@@ -14,6 +14,8 @@ var fs = require('fs'),
 	methodOverride = require('method-override'),
 	cookieParser = require('cookie-parser'),
 	helmet = require('helmet'),
+	jwt = require('jsonwebtoken'),
+	expressJwt = require('express-jwt'),
 	passport = require('passport'),
 	mongoStore = require('connect-mongo')({
 		session: session
@@ -81,7 +83,12 @@ module.exports = function(db) {
 	}));
 	app.use(bodyParser.json());
 	app.use(methodOverride());
-
+	app.use(function(req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
+    next();
+});
 	// CookieParser should be above session
 	app.use(cookieParser());
 

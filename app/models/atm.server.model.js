@@ -25,7 +25,11 @@ var atmSchema = new Schema({
   },
   createdOn: {
     type: Date,
-    "default": Date.now
+    default: Date.now
+  },
+  user: {
+    type: String,
+    default: ''
   }
 });
 

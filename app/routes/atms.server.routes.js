@@ -4,7 +4,7 @@ module.exports = function(app) {
   var express = require('express');
   var atms = require('../../app/controllers/atms.server.controller');
   var router = express.Router();
-  app.use('/api/v2/atms', router);
+  app.use('/api/v1/atms', router);
   // router.use();
     router.route('/search')
       .get(atms.queryATM);
@@ -13,6 +13,6 @@ module.exports = function(app) {
       .post(atms.createATM);
     router.route('/:id')
       .get(atms.getOneATM)
-      .post(atms.updateATM)
+      .put(atms.updateATM)
       .delete(atms.deleteATM);
 };

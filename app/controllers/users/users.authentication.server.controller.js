@@ -7,6 +7,7 @@ var _ = require('lodash'),
 	errorHandler = require('../errors.server.controller'),
 	mongoose = require('mongoose'),
 	passport = require('passport'),
+	jwt = require('jsonwebtoken'),
 	User = mongoose.model('User');
 
 /**
@@ -23,6 +24,7 @@ exports.signup = function(req, res) {
 	// Add missing user fields
 	user.provider = 'local';
 	user.displayName = user.firstName + ' ' + user.lastName;
+	user.token = jwt.sign(user, process.env.JWT_SECRET);
 
 	// Then save the user 
 	user.save(function(err) {

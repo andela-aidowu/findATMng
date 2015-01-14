@@ -1,6 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose'),
+    jwt = ('jsonwebtoken'),
     ATM = mongoose.model('ATM');
 
 var sendJsonResponse = function(res, status, content) {
@@ -25,12 +26,28 @@ var theEarth = (function() {
   };
 })();
 
+//"/api/v1/atms" METHOD="POST"
 exports.createATM = function(req, res) {
-  ATM.create({
-    bank_name: req.body.bank_name,
+  var userToken, user1;
+  userToken = req.body.token || req.params.token || req.header.token;
+  if (!userToken) {
+    sendJsonResponse(res, 403, {'message': 'Please enter your token or visit your profile to get your access token'});
+    return;
+  }
+  jwt.verify(userToken, process.env.JWT_SECRET, function(err, user) {
+    if (err) {
+      sendJsonResponse(res, 401, {'message': 'Incorrect Token, please verify and use correct token'});
+      return;
+    }
+    user1 = user;
+  });
+  ATM
+    .create({
+    bank_name: req.body.bank,
     address: req.body.address,
     state: req.body.state,
     coords: [parseFloat(req.body.lng), parseFloat(req.body.lat)],
+    user: user1.username
   }, function(err, atm) {
     if (err) {
       sendJsonResponse(res, 400, err);
@@ -40,10 +57,11 @@ exports.createATM = function(req, res) {
   });
 };
 
+//"/api/v1/atms" METHOD="GET"
 exports.ATMByDistance = function(req, res) {
   var lng = parseFloat(req.query.lng);
   var lat = parseFloat(req.query.lat);
-  var maxDistance = parseFloat(req.query.maxDistance);
+  var maxDistance = 100;//parseFloat(req.query.maxDistance);
   var point = {
     type: 'Point',
     coordinates: [lng, lat]
@@ -77,6 +95,7 @@ exports.ATMByDistance = function(req, res) {
   });
 };
 
+//"/api/v1/atms/:id" METHOD="GET"
 exports.getOneATM = function(req, res) {
   if (req.params && req.params.atmid) {
     ATM
@@ -96,6 +115,7 @@ exports.getOneATM = function(req, res) {
   }
 };
 
+//"/api/v1/atms/:id" METHOD="PUT"
 exports.updateATM = function(req, res) {
   if (!req.params.atmid) {
     sendJsonResponse(res, 404, {'message': 'Not found, atmid is required"'});
@@ -122,6 +142,7 @@ exports.updateATM = function(req, res) {
     });
 };
 
+//"/api/v1/atms/:id" METHOD="DELETE"
 exports.deleteATM = function(req, res) {
   var atmid = req.params.atmid;
   if (atmid) {
@@ -139,6 +160,7 @@ exports.deleteATM = function(req, res) {
   }
 };
 
+//"/api/v1/atms/search" METHOD="GET"
 exports.queryATM = function(req, res) {
   var obj = {};
   var bankName = req.query.bank;
