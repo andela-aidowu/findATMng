@@ -72,6 +72,7 @@ exports.createATM = function(req, res) {
     bank_name: req.body.bank,
     address: req.body.address,
     state: req.body.state,
+    estimate: req.body.estimate,
     coords: [parseFloat(req.body.lng), parseFloat(req.body.lat)],
     user: user.username
   }, function(err, atm) {

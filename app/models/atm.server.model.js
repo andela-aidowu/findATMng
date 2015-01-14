@@ -53,6 +53,10 @@ var atmSchema = new Schema({
   user: {
     type: String,
     default: ''
+  },
+  estimate: {
+    type: Boolean,
+    default: ''
   }
 });
 
