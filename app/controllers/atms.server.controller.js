@@ -1,8 +1,10 @@
 'use strict';
 
 var mongoose = require('mongoose'),
-    jwt = ('jsonwebtoken'),
-    ATM = mongoose.model('ATM');
+    jwt = require('jsonwebtoken'),
+    ATM = mongoose.model('ATM'),
+    Bank = mongoose.model('Bank'),
+    State = mongoose.model('State');
 
 var sendJsonResponse = function(res, status, content) {
   res.status(status);
@@ -25,11 +27,38 @@ var theEarth = (function() {
     getRadsFromDistance : getRadsFromDistance
   };
 })();
+/*
+  All Banks and states presently in Nigeria(14/01/2015) have been added, but function not delete incase a new state or bank is added but commented out presently to avoid it being tampered with, if need for addition, only the admin can add
+*/
+//'/api/v1/atms/add' Method="POST"
+// exports.addState = function(req, res) {
+//   State.create({
+//     id: req.body.id,
+//     name: req.body.name,
+//   }, function(err, state) {
+//     if (err) {
+//       sendJsonResponse(res, 403, err);
+//     }
+//     sendJsonResponse(res, 201, state);
+//   });
+// };
+
+// exports.addBank = function(req, res) {
+//   Bank.create({
+//     id: req.body.id,
+//     name: req.body.name,
+//   }, function(err, bank) {
+//     if (err) {
+//       sendJsonResponse(res, 403, err);
+//     }
+//     sendJsonResponse(res, 201, bank);
+//   });
+// };
 
 //"/api/v1/atms" METHOD="POST"
 exports.createATM = function(req, res) {
-  var userToken, user1;
-  userToken = req.body.token || req.params.token || req.header.token;
+  var userToken;
+  userToken = req.body.token || req.query.token || req.params.token || req.header.token;
   if (!userToken) {
     sendJsonResponse(res, 403, {'message': 'Please enter your token or visit your profile to get your access token'});
     return;
@@ -39,21 +68,19 @@ exports.createATM = function(req, res) {
       sendJsonResponse(res, 401, {'message': 'Incorrect Token, please verify and use correct token'});
       return;
     }
-    user1 = user;
-  });
-  ATM
-    .create({
+    ATM.create({
     bank_name: req.body.bank,
     address: req.body.address,
     state: req.body.state,
     coords: [parseFloat(req.body.lng), parseFloat(req.body.lat)],
-    user: user1.username
+    user: user.username
   }, function(err, atm) {
     if (err) {
       sendJsonResponse(res, 400, err);
     } else {
       sendJsonResponse(res, 201, atm);
     }
+  });
   });
 };
 
