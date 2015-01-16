@@ -30,18 +30,18 @@ var theEarth = (function() {
 /*
   All Banks and states presently in Nigeria(14/01/2015) have been added, but function not delete incase a new state or bank is added but commented out presently to avoid it being tampered with, if need for addition, only the admin can add
 */
-//'/api/v1/atms/add' Method="POST"
-// exports.addState = function(req, res) {
-//   State.create({
-//     id: req.body.id,
-//     name: req.body.name,
-//   }, function(err, state) {
-//     if (err) {
-//       sendJsonResponse(res, 403, err);
-//     }
-//     sendJsonResponse(res, 201, state);
-//   });
-// };
+// '/api/v1/atms/add' Method="POST"
+exports.addState = function(req, res) {
+  State.create({
+    _id: req.body.id,
+    name: req.body.name,
+  }, function(err, state) {
+    if (err) {
+      sendJsonResponse(res, 403, err);
+    }
+    sendJsonResponse(res, 201, state);
+  });
+};
 
 // exports.addBank = function(req, res) {
 //   Bank.create({
@@ -79,7 +79,16 @@ exports.createATM = function(req, res) {
     if (err) {
       sendJsonResponse(res, 400, err);
     } else {
-      sendJsonResponse(res, 201, atm);
+      console.log(atm.id);
+      ATM
+      .findById(atm._id)
+      .populate('state bank_name')
+      .exec(function(err, atm1) {
+        if (err) {
+          sendJsonResponse(res, 400, err);
+        }
+        sendJsonResponse(res, 201, atm1);
+      });
     }
   });
   });

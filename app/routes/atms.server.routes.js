@@ -8,6 +8,8 @@ module.exports = function(app) {
   // router.use();
     router.route('/search')
       .get(atms.queryATM);
+    router.route('/states')
+      .post(atms.addState);
     router.route('/')
       .get(atms.ATMByDistance)
       .post(atms.createATM);

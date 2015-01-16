@@ -5,7 +5,7 @@ var mongoose = require('mongoose'),
 
 
 var bankSchema = new Schema({
-  id: {
+  _id: {
     type: Number,
     required: 'Please enter an id',
     unique: true
@@ -16,7 +16,7 @@ var bankSchema = new Schema({
 });
 
 var stateSchema = new Schema({
-  id: {
+  _id: {
     type: Number,
     unique: true
   },
