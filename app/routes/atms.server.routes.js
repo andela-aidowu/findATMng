@@ -13,7 +13,7 @@ module.exports = function(app) {
     router.route('/')
       .get(atms.ATMByDistance)
       .post(atms.createATM);
-    router.route('/:id')
+    router.route('/:atmid')
       .get(atms.getOneATM)
       .put(atms.updateATM)
       .delete(atms.deleteATM);

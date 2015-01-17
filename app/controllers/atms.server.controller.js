@@ -98,7 +98,7 @@ exports.createATM = function(req, res) {
 exports.ATMByDistance = function(req, res) {
   var lng = parseFloat(req.query.lng);
   var lat = parseFloat(req.query.lat);
-  var maxDistance = 100;//parseFloat(req.query.maxDistance);
+  var maxDistance = parseFloat(req.query.maxDistance) || 100;
   var point = {
     type: 'Point',
     coordinates: [lng, lat]
@@ -113,23 +113,31 @@ exports.ATMByDistance = function(req, res) {
     });
     return;
   }
-  ATM.geoNear(point, geoOptions, function (err, results, stats) {
-    var atms = [];
-    if (err) {
-      sendJsonResponse(res, 404, err);
-    } else {
-      results.forEach(function(doc) {
-      atms.push({
-        distance: theEarth.getDistanceFromRads(doc.dis),
-        bank_name: doc.obj.bank_name,
-        address: doc.obj.address,
-        state: doc.obj.state,
-        _id: doc.obj._id
-        });
+  ATM.geoNear(
+    [lng, lat],
+    {
+      spherical : true,  
+      //distanceMultiplier: 3959,
+      maxDistance : parseFloat(100) 
+    }, function(err,docs) {
+      if (err)
+        sendJsonResponse(res, 404, err);
+
+      //mapping each doc into new object and populating distance
+      docs = docs.map(function(x) {
+        var a = new ATM( x.obj );
+        a.distance = theEarth.getDistanceFromRads(x.dis);
+        console.log(a.distance);
+        return a;
       });
-      sendJsonResponse(res, 200, atms);
-    }
+
+      // populating user object
+      ATM.populate( docs, { path: 'state bank_name', select: 'name' }, function(err,properties) {
+          if (err) sendJsonResponse(res, 404, err);
+          sendJsonResponse(res, 200, properties);
+      });
   });
+
 };
 
 //"/api/v1/atms/:id" METHOD="GET"
@@ -137,6 +145,7 @@ exports.getOneATM = function(req, res) {
   if (req.params && req.params.atmid) {
     ATM
       .findById(req.params.atmid)
+      .populate('state bank_name', 'name')
       .exec(function(err, atm) {
         if (!atm) {
           sendJsonResponse(res, 404, {'message': 'atmid not found'});
