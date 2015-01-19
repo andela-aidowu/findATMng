@@ -56,7 +56,7 @@ var atmSchema = new Schema({
   },
   estimate: {
     type: Boolean,
-    default: ''
+    default: false
   }
 });
 atmSchema.add({distance: {type: Number, default: ''}});

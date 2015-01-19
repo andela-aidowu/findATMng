@@ -9,7 +9,11 @@ module.exports = function(app) {
     router.route('/search')
       .get(atms.queryATM);
     router.route('/states')
+      .get(atms.getStates)
       .post(atms.addState);
+    router.route('/banks')
+      .get(atms.getBanks)
+      .post(atms.addBank);
     router.route('/')
       .get(atms.ATMByDistance)
       .post(atms.createATM);

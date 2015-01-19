@@ -27,9 +27,7 @@ var theEarth = (function() {
     getRadsFromDistance : getRadsFromDistance
   };
 })();
-/*
-  All Banks and states presently in Nigeria(14/01/2015) have been added, but function not delete incase a new state or bank is added but commented out presently to avoid it being tampered with, if need for addition, only the admin can add
-*/
+
 // '/api/v1/atms/add' Method="POST"
 exports.addState = function(req, res) {
   State.create({
@@ -43,17 +41,37 @@ exports.addState = function(req, res) {
   });
 };
 
-// exports.addBank = function(req, res) {
-//   Bank.create({
-//     id: req.body.id,
-//     name: req.body.name,
-//   }, function(err, bank) {
-//     if (err) {
-//       sendJsonResponse(res, 403, err);
-//     }
-//     sendJsonResponse(res, 201, bank);
-//   });
-// };
+exports.getStates = function(req, res) {
+  State
+    .find({})
+    .select('name')
+    .exec(function(err, states) {
+      if (err) sendJsonResponse(res, 404, err);
+      sendJsonResponse(res, 200, states);
+    });
+};
+
+exports.addBank = function(req, res) {
+  Bank.create({
+    id: req.body.id,
+    name: req.body.name,
+  }, function(err, bank) {
+    if (err) {
+      sendJsonResponse(res, 403, err);
+    }
+    sendJsonResponse(res, 201, bank);
+  });
+};
+
+exports.getBanks = function(req, res) {
+  Bank
+    .find({})
+    .select('name')
+    .exec(function(err, banks) {
+      if (err) sendJsonResponse(res, 404, err);
+      sendJsonResponse(res, 200, banks);
+    });
+};
 
 //"/api/v1/atms" METHOD="POST"
 exports.createATM = function(req, res) {
@@ -127,7 +145,6 @@ exports.ATMByDistance = function(req, res) {
       docs = docs.map(function(x) {
         var a = new ATM( x.obj );
         a.distance = theEarth.getDistanceFromRads(x.dis);
-        console.log(a.distance);
         return a;
       });
 
