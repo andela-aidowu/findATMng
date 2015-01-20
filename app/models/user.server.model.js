@@ -146,5 +146,5 @@ UserSchema.statics.findUniqueUsername = function(username, suffix, callback) {
 		}
 	});
 };
-
+UserSchema.add({admin: {type: Boolean, default: false}});
 mongoose.model('User', UserSchema);
