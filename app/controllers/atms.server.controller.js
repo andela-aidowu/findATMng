@@ -1,6 +1,7 @@
 'use strict';
 
 var mongoose = require('mongoose'),
+    _ = require('lodash'),
     jwt = require('jsonwebtoken'),
     ATM = mongoose.model('ATM'),
     Bank = mongoose.model('Bank'),
@@ -191,10 +192,12 @@ exports.updateATM = function(req, res) {
         sendJsonResponse(res, 404, {'message': 'atmid not found'});
         return;
       }
-      atm.bank = req.body.bank_name || atm.bank_name;
-      atm.address = req.body.address || atm.address;
-      atm.state = req.body.state || atm.state;
-      atm.coords = [parseFloat(req.body.lng), parseFloat(req.body.lat)] || atm.coords;
+      atm = _.extend(atm, req.body);
+      // atm.bank = req.body.bank_name || atm.bank_name;
+      // atm.address = req.body.address || atm.address;
+      // atm.state = req.body.state || atm.state;
+      // atm.coords = [parseFloat(req.body.lng), parseFloat(req.body.lat)] || atm.coords;
+      // atm.estimate = req.body.estimate || atm.estimate;
       atm.save(function(err, atm) {
         if(err) {
           sendJsonResponse(res, 404, err);
