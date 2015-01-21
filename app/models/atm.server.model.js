@@ -59,7 +59,16 @@ var atmSchema = new Schema({
     default: false
   }
 });
-atmSchema.add({distance: {type: Number, default: ''}});
+atmSchema.add({
+  distance: {
+    type: Number,
+    default: ''
+  },
+  updatedOn: {
+    type: Date, 
+    default: Date.now
+  }
+});
 
 mongoose.model('Bank', bankSchema);
 mongoose.model('State', stateSchema);

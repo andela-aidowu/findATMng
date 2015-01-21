@@ -193,11 +193,7 @@ exports.updateATM = function(req, res) {
         return;
       }
       atm = _.extend(atm, req.body);
-      // atm.bank = req.body.bank_name || atm.bank_name;
-      // atm.address = req.body.address || atm.address;
-      // atm.state = req.body.state || atm.state;
-      // atm.coords = [parseFloat(req.body.lng), parseFloat(req.body.lat)] || atm.coords;
-      // atm.estimate = req.body.estimate || atm.estimate;
+      atm.updatedOn = Date.now();
       atm.save(function(err, atm) {
         if(err) {
           sendJsonResponse(res, 404, err);
