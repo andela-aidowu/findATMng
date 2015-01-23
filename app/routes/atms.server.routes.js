@@ -15,10 +15,12 @@ module.exports = function(app) {
       .get(atms.getBanks)
       .post(atms.addBank);
     router.route('/')
-      .get(atms.ATMByDistance)
+      .get(atms.getAllAtms)
       .post(atms.createATM);
     router.route('/:atmid')
       .get(atms.getOneATM)
       .put(atms.updateATM)
       .delete(atms.deleteATM);
+    router.route('/user/:userid')
+      .get(atms.getUserAtms);
 };

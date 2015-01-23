@@ -28,6 +28,46 @@ var theEarth = (function() {
     getRadsFromDistance : getRadsFromDistance
   };
 })();
+function atmsByDistance (req, res) {
+  var obj = {}, lng, lat;
+  lng = parseFloat(req.query.lng);
+  lat = parseFloat(req.query.lat);
+  if (req.query.userid) {
+    obj.user = req.query.userid;
+  }
+  // obj.state = 37;
+  var maxDistance = parseFloat(req.query.maxDistance) || 100;
+  if (!lng && lng !==0 || !lat && lat !==0) {
+    sendJsonResponse(res, 404, {
+      'message': 'lng and lat query parameters are required'
+    });
+    return;
+  }
+  ATM.geoNear(
+    [lng, lat],
+    {
+      spherical: true,  
+      //distanceMultiplier: 3959,
+      maxDistance: parseFloat(100),
+      query: obj
+    }, function(err,docs) {
+      if (err)
+        sendJsonResponse(res, 404, err);
+
+      //mapping each doc into new object and populating distance
+      docs = docs.map(function(x) {
+        var a = new ATM( x.obj );
+        a.distance = theEarth.getDistanceFromRads(x.dis);
+        return a;
+      });
+
+      // populating user object
+      ATM.populate( docs, { path: 'state bank_name', select: 'name' }, function(err,properties) {
+          if (err) sendJsonResponse(res, 404, err);
+          sendJsonResponse(res, 200, properties);
+      });
+  });
+}
 
 // '/api/v1/atms/add' Method="POST"
 exports.addState = function(req, res) {
@@ -114,48 +154,8 @@ exports.createATM = function(req, res) {
 };
 
 //"/api/v1/atms" METHOD="GET"
-exports.ATMByDistance = function(req, res) {
-  var lng = parseFloat(req.query.lng);
-  var lat = parseFloat(req.query.lat);
-  var maxDistance = parseFloat(req.query.maxDistance) || 100;
-  var point = {
-    type: 'Point',
-    coordinates: [lng, lat]
-  };
-  var geoOptions = {
-    spherical: true,
-    maxDistance: theEarth.getRadsFromDistance(maxDistance),
-  };
-  if (!lng && lng !==0 || !lat && lat !==0) {
-    sendJsonResponse(res, 404, {
-      'message': 'lng and lat query parameters are required'
-    });
-    return;
-  }
-  ATM.geoNear(
-    [lng, lat],
-    {
-      spherical : true,  
-      //distanceMultiplier: 3959,
-      maxDistance : parseFloat(100) 
-    }, function(err,docs) {
-      if (err)
-        sendJsonResponse(res, 404, err);
-
-      //mapping each doc into new object and populating distance
-      docs = docs.map(function(x) {
-        var a = new ATM( x.obj );
-        a.distance = theEarth.getDistanceFromRads(x.dis);
-        return a;
-      });
-
-      // populating user object
-      ATM.populate( docs, { path: 'state bank_name', select: 'name' }, function(err,properties) {
-          if (err) sendJsonResponse(res, 404, err);
-          sendJsonResponse(res, 200, properties);
-      });
-  });
-
+exports.getAllAtms = function(req, res) {
+  atmsByDistance(req, res);
 };
 
 //"/api/v1/atms/:id" METHOD="GET"
@@ -272,4 +272,8 @@ exports.queryATM = function(req, res) {
         sendJsonResponse(res, 200, atms);
       });
   }
+};
+
+exports.getUserAtms = function(req, res) {
+  atmsByDistance(req, res);
 };
